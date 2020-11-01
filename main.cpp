@@ -1,12 +1,13 @@
 #include <SFML/Graphics.hpp>
+#include <iostream>
 #include <cstdlib>
 #include <cmath>
 #include <ctime>
 #include <vector>
 #include <random>
 
+
 constexpr int WIDTH = 800, HEIGHT = 600;
-const int MAX_HEALTH = 100;
 
 namespace {
     int getIndex(int x, int y) {
@@ -22,23 +23,51 @@ enum class CreatureType {
 
 class Creature {
     public:
+        constexpr static int MAX_HEALTH = 100;
         Creature();
+
         sf::Color getColour();
+
         void setType(CreatureType newType);
-        void heal (int amount);
+        CreatureType getType();
+        void setHealth(int newHealth);
         int getHealth();
-        void Creature::update();
+
+        void heal (int amount);
+        void update();
+        void move(Creature& otherCreature);
+        void reproduce(Creature& otherCreature);
     private:
         CreatureType m_type;
-        int m_health = 100;
+        int m_health = MAX_HEALTH / 5;
 };
 
 Creature::Creature() {
-    static std::minstd_rand randDevice(std::time(nullptr));
-    std::uniform_int_distribution<int> dist(0, 2);
+    auto n = rand() % 1000;
+    if (n > 100)
+        m_type = CreatureType::Nothing;
+    else if (n > 50)
+        m_type = CreatureType::Prey;
+    else
+        m_type = CreatureType::Predator;
+}  
 
-    m_type = static_cast<CreatureType>(dist(randDevice)); //set m_type to a random number between 1 or 2
-}                                                         //cast to get it correct type
+void Creature::reproduce(Creature& otherCreature) {
+    otherCreature.m_health = 10;
+    otherCreature.m_type = CreatureType::Prey;
+}
+
+void Creature::setHealth(int newHealth) {
+    m_health = newHealth;
+    return;
+}
+
+void Creature::move(Creature& otherCreature) {
+    otherCreature.m_health = m_health;
+    otherCreature.m_type = m_type;
+    m_type = CreatureType::Nothing;
+    return;
+}
 
 void Creature::update() {
     switch (m_type) {
@@ -51,6 +80,10 @@ void Creature::update() {
         default:
             break;
     }
+}
+
+CreatureType Creature::getType() {
+    return m_type;
 }
 
 int Creature::getHealth() {
@@ -92,10 +125,12 @@ class Application {
     public:
         Application();
         void run();
-    
+        void update();
+        
     private:
         void pollEvents();
-        void update();
+        void updatePredator(Creature& currentCreature, Creature& nextCreature);
+        void updatePrey(Creature& currentCreature, Creature& nextCreature);
         sf::RenderWindow m_window;
         std::vector<sf::Vertex> m_pixels;
         std::vector<Creature> m_creatures;
@@ -117,6 +152,7 @@ Application::Application()
 void Application::run() {
     while (m_window.isOpen()) {
         m_window.clear();
+        update();
         m_window.draw(m_pixels.data(), m_pixels.size(), sf::Points);
         m_window.display();
         pollEvents();
@@ -137,8 +173,10 @@ void Application::update() {
     for (int x = 0; x < WIDTH; ++x) 
         for (int y = 0; y < HEIGHT; ++y) {
             auto index = getIndex(x, y);
-            CreatureType currentType = m_creatures[index].m_type;
-            if (currentType == CreatureType::Nothing) //Only updating living creatures
+            auto& currentCreature = m_creatures[index];
+            CreatureType currentCreatureType = currentCreature.getType();
+            
+            if (currentCreatureType == CreatureType::Nothing) //Only updating living creatures
                 continue;
 
             std::uniform_int_distribution<int> dist(-1, 1);
@@ -153,41 +191,70 @@ void Application::update() {
                 continue;
 
             auto nextIndex = getIndex(xNext, yNext);
-            CreatureType nextType = m_creatures[nextIndex].m_type();
+            auto& nextCreature = m_creatures[nextIndex];
 
-            currentType.update();
-            switch (currentType) {
+            
+
+            currentCreature.update();
+            switch (currentCreatureType) {
                 case CreatureType::Predator:
-                    updatePredator(currentType, nextType);
+                    updatePredator(currentCreature, nextCreature);
                     break;
                 case CreatureType::Prey:
-                    updatePrey(currentType, nextType);
+                    updatePrey(currentCreature, nextCreature);
                     break;
                 default:
                     break;
             }
-            setCellColour(x, y, m_creatures[index].getColour());
+            m_pixels[index].color = m_creatures[index].getColour();
+            m_pixels[nextIndex].color = m_creatures[nextIndex].getColour();
         }
 }
 
-void Application::setCellColour(int x, int y, sf::Color colour) {
-
+void Application::updatePredator(Creature& currentCreature, Creature& nextCreature) {
+    if (currentCreature.getHealth() <= 0) {
+        currentCreature.setType(CreatureType::Nothing);
+        return;
+    }
+    auto nextCreatureType = nextCreature.getType();
+    switch (nextCreatureType) {
+        case CreatureType::Prey:
+            nextCreature.setType(CreatureType::Predator);
+            currentCreature.heal(nextCreature.getHealth());
+            break;
+        case CreatureType::Predator:
+            break;
+        case CreatureType::Nothing:
+            currentCreature.move(nextCreature);
+            break;
+    }
 }
 
-void Application::updatePredator() {
-
+void Application::updatePrey(Creature& currentCreature, Creature& nextCreature) {
+    bool reproduce = false;
+    auto nextCreatureType = nextCreature.getType();
+    if (currentCreature.getHealth() >= Creature::MAX_HEALTH) {
+        currentCreature.setHealth(10);
+        reproduce = true;
+    }
+    switch (nextCreatureType) {
+        case CreatureType::Prey:
+            break;
+        case CreatureType::Predator:
+            break;
+        case CreatureType::Nothing:
+            if (reproduce) {
+                currentCreature.reproduce(nextCreature);
+            }
+            else {
+                currentCreature.move(nextCreature);
+            }
+            break;
+    }
 }
-
-void Application::updatePrey() {
-
-}
-
-int getRandomInt() {
-    return std::rand() + 100;
-}
-
 
 int main(int argc, char** argv) {
+    srand(time(NULL));
     Application app;
     app.run();
     return 0;
