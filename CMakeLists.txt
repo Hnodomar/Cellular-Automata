@@ -1,0 +1,16 @@
+cmake_minimum_required(VERSION 3.16)
+
+project(CellularAutomata)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+if(WIN32)
+    set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake) #module mode for windows
+endif()
+
+find_package(SFML REQUIRED COMPONENTS graphics) #config mode for unix is fine
+
+include_directories(${SFML_INCLUDE_DIR})
+add_executable(automata main.cpp)
+target_link_libraries(automata sfml-graphics)

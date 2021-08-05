@@ -1,2 +1,0 @@
-all:
-	g++ main.cpp -o text.exe -DSFML_STATIC -I C:\Users\Homer\Documents\Development\Messing-Around\C++\install\include -L C:\Users\Homer\Documents\Development\Messing-Around\C++\install\lib -lsfml-graphics-s -lsfml-window-s -lsfml-system-s -lopengl32 -lwinmm -lgdi32 -lfreetype
