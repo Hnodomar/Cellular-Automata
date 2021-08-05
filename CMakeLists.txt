@@ -11,6 +11,8 @@ endif()
 
 find_package(SFML REQUIRED COMPONENTS graphics) #config mode for unix is fine
 
-include_directories(${SFML_INCLUDE_DIR})
-add_executable(automata main.cpp)
+file(GLOB SOURCES "src/*.cpp")
+
+include_directories(${SFML_INCLUDE_DIR} include)
+add_executable(automata ${SOURCES})
 target_link_libraries(automata sfml-graphics)

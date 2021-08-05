@@ -1,11 +1,4 @@
-#include <SFML/Graphics.hpp>
-#include <iostream>
-#include <cstdlib>
-#include <cmath>
-#include <ctime>
-#include <vector>
-#include <random>
-
+#include "application.hpp"
 
 constexpr int WIDTH = 800, HEIGHT = 600;
 
@@ -14,127 +7,6 @@ namespace {
         return y * WIDTH + x;
     }
 }
-
-enum class CreatureType {
-    Predator = 0,
-    Prey = 1,
-    Nothing = 2
-};
-
-class Creature {
-    public:
-        constexpr static int MAX_HEALTH = 100;
-        Creature();
-
-        sf::Color getColour();
-
-        void setType(CreatureType newType);
-        CreatureType getType();
-        void setHealth(int newHealth);
-        int getHealth();
-
-        void heal (int amount);
-        void update();
-        void move(Creature& otherCreature);
-        void reproduce(Creature& otherCreature);
-    private:
-        CreatureType m_type;
-        int m_health = MAX_HEALTH / 5;
-};
-
-Creature::Creature() {
-    auto n = rand() % 1000;
-    if (n > 100)
-        m_type = CreatureType::Nothing;
-    else if (n > 50)
-        m_type = CreatureType::Prey;
-    else
-        m_type = CreatureType::Predator;
-}  
-
-void Creature::reproduce(Creature& otherCreature) {
-    otherCreature.m_health = 10;
-    otherCreature.m_type = CreatureType::Prey;
-}
-
-void Creature::setHealth(int newHealth) {
-    m_health = newHealth;
-    return;
-}
-
-void Creature::move(Creature& otherCreature) {
-    otherCreature.m_health = m_health;
-    otherCreature.m_type = m_type;
-    m_type = CreatureType::Nothing;
-    return;
-}
-
-void Creature::update() {
-    switch (m_type) {
-        case CreatureType::Predator:
-            heal(-1);
-            break;
-        case CreatureType::Prey:
-            heal(1);
-            break;
-        default:
-            break;
-    }
-}
-
-CreatureType Creature::getType() {
-    return m_type;
-}
-
-int Creature::getHealth() {
-    return m_health;
-}
-
-void Creature::heal(int amount) {
-    m_health += amount;
-    if (m_health > MAX_HEALTH) m_health = MAX_HEALTH;
-    return;
-}
-
-void Creature::setType(CreatureType newType) {
-    m_type = newType;
-    return;
-}
-
-sf::Color Creature::getColour() {
-    if (m_type == CreatureType::Nothing)
-        return sf::Color::Black;
-    else {
-        float normalisedHealth = MAX_HEALTH / m_health;
-        uint8_t col = normalisedHealth * 255; //to get correct shade of red / green
-        switch (m_type) {
-            case CreatureType::Predator:
-                return {col, 0, 0};
-                break;
-            case CreatureType::Prey:
-                return {0, col, 0};
-                break;
-            default:
-                return sf::Color::Black;
-                break;
-        }
-    }
-}
-
-class Application {
-    public:
-        Application();
-        void run();
-        void update();
-        
-    private:
-        void pollEvents();
-        void updatePredator(Creature& currentCreature, Creature& nextCreature);
-        void updatePrey(Creature& currentCreature, Creature& nextCreature);
-        sf::RenderWindow m_window;
-        std::vector<sf::Vertex> m_pixels;
-        std::vector<Creature> m_creatures;
-};
 
 Application::Application()
     : m_window ({WIDTH, HEIGHT}, "Predator and Prey")
@@ -252,10 +124,3 @@ void Application::updatePrey(Creature& currentCreature, Creature& nextCreature) 
             break;
     }
 }
-
-int main(int argc, char** argv) {
-    srand(time(NULL));
-    Application app;
-    app.run();
-    return 0;
-} 
