@@ -4,10 +4,12 @@ Creature::Creature() {
     auto n = rand() % 1000;
     if (n > 100)
         m_type = CreatureType::Nothing;
-    else if (n > 50)
+    else if (n > 50) {
         m_type = CreatureType::Prey;
-    else
+    }
+    else {
         m_type = CreatureType::Predator;
+    }
 }  
 
 void Creature::reproduce(Creature& otherCreature) {

@@ -11,7 +11,11 @@ namespace {
 Application::Application()
     : m_window ({WIDTH, HEIGHT}, "Predator and Prey")
     , m_pixels (WIDTH * HEIGHT)
-    , m_creatures (WIDTH * HEIGHT) {
+    , m_creatures (WIDTH * HEIGHT)
+    #ifdef LOGGING
+    , logger(m_creatures)
+    #endif
+    {
         m_window.setFramerateLimit(60);
         for (int x = 0; x < WIDTH; ++x)
             for (int y = 0; y < HEIGHT; ++y) {
@@ -25,6 +29,9 @@ void Application::run() {
     while (m_window.isOpen()) {
         m_window.clear();
         update();
+        #ifdef LOGGING
+        logger.outputPops();
+        #endif
         m_window.draw(m_pixels.data(), m_pixels.size(), sf::Points);
         m_window.display();
         pollEvents();
@@ -86,6 +93,9 @@ void Application::update() {
 void Application::updatePredator(Creature& currentCreature, Creature& nextCreature) {
     if (currentCreature.getHealth() <= 0) {
         currentCreature.setType(CreatureType::Nothing);
+        #ifdef LOGGING
+            --logger.num_pred;
+        #endif
         return;
     }
     auto nextCreatureType = nextCreature.getType();
@@ -93,6 +103,10 @@ void Application::updatePredator(Creature& currentCreature, Creature& nextCreatu
         case CreatureType::Prey:
             nextCreature.setType(CreatureType::Predator);
             currentCreature.heal(nextCreature.getHealth());
+            #ifdef LOGGING
+                ++logger.num_pred;
+                --logger.num_prey;
+            #endif
             break;
         case CreatureType::Predator:
             break;
@@ -117,6 +131,9 @@ void Application::updatePrey(Creature& currentCreature, Creature& nextCreature) 
         case CreatureType::Nothing:
             if (reproduce) {
                 currentCreature.reproduce(nextCreature);
+                #ifdef LOGGING
+                    ++logger.num_prey;
+                #endif
             }
             else {
                 currentCreature.move(nextCreature);

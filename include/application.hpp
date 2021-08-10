@@ -4,7 +4,11 @@
 #include <vector>
 #include <random>
 #include <SFML/Graphics.hpp>
-#include "creature.hpp"
+#ifdef LOGGING
+    #include "logger.hpp"
+#else
+    #include "creature.hpp"
+#endif
 
 class Application {
     public:
@@ -19,6 +23,9 @@ class Application {
         sf::RenderWindow m_window;
         std::vector<sf::Vertex> m_pixels;
         std::vector<Creature> m_creatures;
+        #ifdef LOGGING
+        PopulationLogger logger;
+        #endif
 };
 
 #endif
