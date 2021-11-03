@@ -4,7 +4,7 @@ Creature::Creature() {
     auto n = rand() % 1000;
     if (n > 100)
         m_type = CreatureType::Nothing;
-    else if (n > 50) {
+    else if (n > 90) {
         m_type = CreatureType::Prey;
     }
     else {

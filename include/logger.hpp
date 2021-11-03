@@ -17,7 +17,7 @@ class PopulationLogger {
         uint32_t epoch = 0;
         void outputPops() {
             std::ofstream pop_data;
-            pop_data.open("../data.txt", std::ios_base::app);
+            pop_data.open("../data.dat", std::ios_base::app);
             pop_data << num_prey << " " << num_pred << " " << epoch << std::endl;
             ++epoch;
             pop_data.close();
