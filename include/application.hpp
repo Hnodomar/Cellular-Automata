@@ -10,22 +10,31 @@
     #include "creature.hpp"
 #endif
 
-class Application {
-    public:
-        Application();
-        void run();
-        void update();
+class Application
+{
+public:
+
+  Application();
+
+  void run();
+
+  void update();
         
-    private:
-        void pollEvents();
-        void updatePredator(Creature& currentCreature, Creature& nextCreature);
-        void updatePrey(Creature& currentCreature, Creature& nextCreature);
-        sf::RenderWindow m_window;
-        std::vector<sf::Vertex> m_pixels;
-        std::vector<Creature> m_creatures;
-        #ifdef LOGGING
-        PopulationLogger logger;
-        #endif
+private:
+  
+  void pollEvents();
+
+  bool is_alive(const int x, const int y);
+    
+  sf::RenderWindow m_window;
+  
+  std::vector<sf::Vertex> m_pixels;
+  
+  std::vector<Creature> m_creatures;
+  
+  #ifdef LOGGING
+  PopulationLogger logger;
+  #endif
 };
 
 #endif

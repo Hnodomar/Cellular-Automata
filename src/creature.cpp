@@ -1,15 +1,13 @@
 #include "creature.hpp"
 
 Creature::Creature() {
-    auto n = rand() % 1000;
-    if (n > 100)
-        m_type = CreatureType::Nothing;
-    else if (n > 90) {
-        m_type = CreatureType::Prey;
-    }
-    else {
-        m_type = CreatureType::Predator;
-    }
+  auto n = rand() % 1000;
+
+  if (n > 30)
+    m_type = CreatureType::Nothing;
+  else {
+    m_type = CreatureType::Prey;
+  }
 }  
 
 void Creature::reproduce(Creature& otherCreature) {
