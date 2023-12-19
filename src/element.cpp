@@ -66,6 +66,16 @@ element_t::select_state_t::select_state_t(
 {
   diff_radius_op<1>(
     [&](const int x, const int y) {
+      const bool out_of_bounds = {
+        (_centre.x + x < 0) || (_centre.x + x >= _elements.size()) ||
+        (_centre.y + y < 0) || (_centre.y + y >= _elements[x].size())
+      };
+
+      if (out_of_bounds) {
+        std::cerr << "grid_square_op(): out of bounds" << std::endl;
+        // throw std::runtime_error("grid_square_op(): out of bounds");
+      }
+
       element_t& element = elements[_centre.x + x][_centre.y + y];
       const int pos = element.get_oned_pos();
 
